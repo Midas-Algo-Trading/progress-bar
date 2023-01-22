@@ -8,7 +8,7 @@
 int main()
 {
 	int total = 0;
-	pbar pBar(100);
+	pbar pBar(100, "Testing");
 	for (int i = 0; i < 100; i++)
 	{
 		pBar.tick(1);

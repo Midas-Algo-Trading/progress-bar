@@ -10,8 +10,8 @@
 #include "pbar.h"
 #include "utils/formatter.h"
 
-pbar::pbar(int total, int n, std::optional<std::string> desc, char filledChar, char notFilledChar)
-	: total(total), n(n), desc(std::move(desc)), filledChar(filledChar), notFilledChar(notFilledChar)
+pbar::pbar(int total, std::optional<std::string> desc, int n, char filledChar, char notFilledChar)
+	: total(total), desc(std::move(desc)), n(n), filledChar(filledChar), notFilledChar(notFilledChar)
 {
 	this->startTime = std::chrono::high_resolution_clock::now();
 	std::cout << "created" << std::endl;
@@ -28,6 +28,9 @@ unsigned short pbar::getConsoleWidth() const
 
 void pbar::printProgressBar(float iterElapsedTime) const
 {
+	// Create the description.
+	std::string _description = this->desc ? desc.value() + ": " : "";
+
 	// Create the percent completed.
 	std::string _pctCompleted = std::to_string((int) (100 * this->getPctCompleted()));
 
@@ -41,12 +44,12 @@ void pbar::printProgressBar(float iterElapsedTime) const
 	std::string _itersSecond = roundNumber(iterElapsedTime, 2);
 
 	// Create the bar
-	short totalBarWidth = -4 - 1 + getConsoleWidth() - 2 - _iterations.length() - 2 - _times.length() - 31;
+	short totalBarWidth = -_description.length() - 4 - 1 + getConsoleWidth() - 2 - _iterations.length() - 2 - _times.length() - 31;
 	short barCompletedLength = totalBarWidth * getPctCompleted();
 	short barIncompleteLength = totalBarWidth - barCompletedLength;
 	std::string _bar = "|" + std::string(barCompletedLength, this->filledChar) + std::string(barIncompleteLength, this->notFilledChar) + "|";
 
-	std::cout << "\r" << _pctCompleted << "% " << _bar << " [" << _times << ", " << _itersSecond << "it/s]";
+	std::cout << "\r" << _description << _pctCompleted << "% " << _bar << ' ' << _iterations << " [" << _times << ", " << _itersSecond << "it/s]";
 }
 
 void pbar::tick(int by)

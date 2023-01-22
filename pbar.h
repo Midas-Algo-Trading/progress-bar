@@ -19,8 +19,8 @@ class pbar
 {
     public:
 	int total;
-	int n = 50;
 	std::optional<std::string> desc;
+	int n;
 	char filledChar;
 	char notFilledChar;
     private:
@@ -33,7 +33,7 @@ class pbar
 	int getDurationSeconds() const;
 	int getTimeRemaining() const;
     public:
-	pbar(int = 100, int = 0, std::optional<std::string> = std::optional<std::string>(), char = '#', char = '-');
+	pbar(int = 100, std::optional<std::string> = std::optional<std::string>(), int = 0, char = '#', char = '-');
 	void tick(int by);
 };
 
