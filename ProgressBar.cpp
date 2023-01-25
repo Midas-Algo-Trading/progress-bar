@@ -7,26 +7,30 @@
 #include <utility>
 #include <windows.h>
 #include <chrono>
-#include "pbar.h"
+#include "ProgressBar.h"
 #include "utils/formatter.h"
+#include "consoleWindows.h"
 
-pbar::pbar(int total, std::optional<std::string> desc, int n, char filledChar, char notFilledChar)
-	: total(total), desc(std::move(desc)), n(n), filledChar(filledChar), notFilledChar(notFilledChar)
+ProgressBar::ProgressBar(int total, std::optional<std::string> desc, int position, int n, char filledChar, char notFilledChar)
+	: totalIterations(total), desc(std::move(desc)), n(n), position(position), filledChar(filledChar), notFilledChar(notFilledChar)
 {
+	// Set the start time.
 	this->startTime = std::chrono::high_resolution_clock::now();
-	std::cout << "created" << std::endl;
+
+	this->setConsoleWindow();
 }
 
-float pbar::getPctCompleted() const { return (float) n / (float) total; }
+float ProgressBar::getPctCompleted() const { return (float) n / (float) this->totalIterations; }
 
-unsigned short pbar::getConsoleWidth() const
+void ProgressBar::setConsoleWindow()
 {
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	return csbi.dwSize.X;
+	#ifdef _WIN32
+		this->console = windowsConsoleWindow();
+	#endif
 }
 
-void pbar::printProgressBar(float iterElapsedTime) const
+
+void ProgressBar::printProgressBar(float& iterElapsedTime) const
 {
 	// Create the description.
 	std::string _description = this->desc ? desc.value() + ": " : "";
@@ -35,7 +39,7 @@ void pbar::printProgressBar(float iterElapsedTime) const
 	std::string _pctCompleted = std::to_string((int) (100 * this->getPctCompleted()));
 
 	// Create the iterations.
-	std::string _iterations = formatWithCommas<int>(n) + "/" + formatWithCommas<int>(total);
+	std::string _iterations = formatWithCommas<int>(n) + "/" + formatWithCommas<int>(this->totalIterations);
 
 	// Create the elapsed and estimated time.
 	std::string _times = formatTime(this->getDurationSeconds()) + "<" + formatTime(this->getTimeRemaining());
@@ -44,15 +48,22 @@ void pbar::printProgressBar(float iterElapsedTime) const
 	std::string _itersSecond = roundNumber(iterElapsedTime, 2);
 
 	// Create the bar
-	short totalBarWidth = -_description.length() - 4 - 1 + getConsoleWidth() - 2 - _iterations.length() - 2 - _times.length() - 31;
+	short totalBarWidth = -_description.length() - 4 - 1 + this->console.width - 2 - _iterations.length() - 2 - _times.length() - 31;
 	short barCompletedLength = totalBarWidth * getPctCompleted();
 	short barIncompleteLength = totalBarWidth - barCompletedLength;
 	std::string _bar = "|" + std::string(barCompletedLength, this->filledChar) + std::string(barIncompleteLength, this->notFilledChar) + "|";
 
-	std::cout << "\r" << _description << _pctCompleted << "% " << _bar << ' ' << _iterations << " [" << _times << ", " << _itersSecond << "it/s]";
+	// Reset the cursor position before printing.
+	this->console.resetCursorPosition();
+
+	for (int i = 0; i < this->position; i++) {
+		std::cout << "\n";
+	}
+
+	std::cout << _description << _pctCompleted << "% " << _bar << ' ' << _iterations << " [" << _times << ", " << _itersSecond << "it/s]" << std::flush;
 }
 
-void pbar::tick(int by)
+void ProgressBar::tick(int by)
 {
 	auto now = std::chrono::high_resolution_clock::now();
 	float iterElapsedTime = 1000000.0f / static_cast<float>(std::chrono::duration_cast<std::chrono::microseconds>(now - this->lastIterTime).count());
@@ -60,13 +71,23 @@ void pbar::tick(int by)
 	this->n += by;
 	this->printProgressBar(iterElapsedTime);
 	this->lastIterTime = now;
+
+	if (parent)
+	{
+		parent.value()->tick(by);
+	}
 }
 
-int pbar::getDurationSeconds() const
+int ProgressBar::getDurationSeconds() const
 {
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	return static_cast<int>(std::chrono::duration_cast<std::chrono::seconds>(currentTime - this->startTime).count());
 }
 
-int pbar::getTimeRemaining() const { return ((1 / this->getPctCompleted()) - 1) * getDurationSeconds(); }
+int ProgressBar::getTimeRemaining() const { return ((1 / this->getPctCompleted()) - 1) * getDurationSeconds(); }
 
+ProgressBar& ProgressBar::operator++(int by)
+{
+	this->tick(by);
+	return *this;
+}

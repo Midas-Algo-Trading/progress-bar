@@ -2,17 +2,26 @@
 
 #include <iostream>
 #include <string>
-#include "pbar.h"
+#include "ProgressBar.h"
+#include "multiProgressBar.h"
 #include <thread>
 
 int main()
 {
 	int total = 0;
-	pbar pBar(100, "Testing");
+	MultiProgressBar mBar("MultiBar", 0);
+	ProgressBar pBar1(100, "ProgressBar1", 1);
+	ProgressBar pBar2(100, "ProgressBar2", 2);
+	mBar.addChild(pBar1);
+	mBar.addChild(pBar2);
 	for (int i = 0; i < 100; i++)
 	{
-		pBar.tick(1);
-		for (int j = 0; j < 100000000; j++) {
+		pBar1.tick(1);
+		for (int j = 0; j < 50000000; j++) {
+			total += j * j;
+		}
+		pBar2.tick(1);
+		for (int j = 0; j < 50000000; j++) {
 			total += j * j;
 		}
 	}
