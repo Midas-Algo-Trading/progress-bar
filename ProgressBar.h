@@ -1,13 +1,5 @@
-//
-// Created by Erik on 1/20/2023.
-//
-
 #ifndef PROGRESS_BAR_PROGRESSBAR_H
 #define PROGRESS_BAR_PROGRESSBAR_H
-
-//
-// Created by Erik on 1/20/2023.
-//
 
 #include <string>
 #include <iostream>
@@ -28,8 +20,8 @@ class ProgressBar {
 	char filledChar;
 	char notFilledChar;
     private:
-	std::chrono::time_point<std::chrono::system_clock, std::chrono::duration<long long, std::ratio<1, 1000000000>>> startTime;
-	std::chrono::time_point<std::chrono::system_clock, std::chrono::duration<long long, std::ratio<1, 1000000000>>> lastIterTime;
+	std::chrono::high_resolution_clock::time_point startTime;
+	std::chrono::high_resolution_clock::time_point lastIterTime;
     protected:
 	std::optional<ProgressBar *> parent;
     protected:

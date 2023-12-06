@@ -1,7 +1,3 @@
-//
-// Created by Erik on 1/24/2023.
-//
-
 #include "ProgressBar.h"
 #include "multiProgressBar.h"
 

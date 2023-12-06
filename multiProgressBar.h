@@ -1,7 +1,3 @@
-//
-// Created by Erik on 1/24/2023.
-//
-
 #ifndef PROGRESS_BAR_MULTIPROGRESSBAR_H
 #define PROGRESS_BAR_MULTIPROGRESSBAR_H
 

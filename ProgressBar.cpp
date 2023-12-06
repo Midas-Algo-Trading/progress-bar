@@ -1,7 +1,3 @@
-//
-// Created by Erik on 1/20/2023.
-//
-
 #include <string>
 #include <optional>
 #include <utility>
@@ -32,6 +28,9 @@ void ProgressBar::setConsoleWindow()
 
 void ProgressBar::printProgressBar(float& iterElapsedTime) const
 {
+	// Create indentation.
+	std::string _indentation = parent.has_value() ? "    " : "";
+
 	// Create the description.
 	std::string _description = this->desc ? desc.value() + ": " : "";
 
@@ -48,7 +47,7 @@ void ProgressBar::printProgressBar(float& iterElapsedTime) const
 	std::string _itersSecond = roundNumber(iterElapsedTime, 2);
 
 	// Create the bar
-	short totalBarWidth = -_description.length() - 4 - 1 + this->console.width - 2 - _iterations.length() - 2 - _times.length() - 31;
+	short totalBarWidth = -_indentation.length() - _description.length() - 4 - 1 + this->console.width - 2 - _iterations.length() - 2 - _times.length() - 31;
 	short barCompletedLength = totalBarWidth * getPctCompleted();
 	short barIncompleteLength = totalBarWidth - barCompletedLength;
 	std::string _bar = "|" + std::string(barCompletedLength, this->filledChar) + std::string(barIncompleteLength, this->notFilledChar) + "|";
@@ -60,7 +59,7 @@ void ProgressBar::printProgressBar(float& iterElapsedTime) const
 		std::cout << "\n";
 	}
 
-	std::cout << _description << _pctCompleted << "% " << _bar << ' ' << _iterations << " [" << _times << ", " << _itersSecond << "it/s]" << std::flush;
+	std::cout << _indentation << _description << _pctCompleted << "% " << _bar << ' ' << _iterations << " [" << _times << ", " << _itersSecond << "it/s]" << std::flush;
 }
 
 void ProgressBar::tick(int by)

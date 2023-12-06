@@ -1,7 +1,3 @@
-//
-// Created by Erik on 1/22/2023.
-//
-
 #ifndef PROGRESS_BAR_CONSOLEWINDOWS_H
 #define PROGRESS_BAR_CONSOLEWINDOWS_H
 
